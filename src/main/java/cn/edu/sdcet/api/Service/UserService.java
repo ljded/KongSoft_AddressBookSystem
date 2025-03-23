@@ -1,12 +1,12 @@
-package cn.edu.sdcet.api.dao;
+package cn.edu.sdcet.api.Service;
 
 import cn.edu.sdcet.api.Mapper.UserMI;
-import cn.edu.sdcet.api.entity.User;
+import cn.edu.sdcet.api.Entity.User;
 import jakarta.annotation.Resource;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
-public class UserDao {
+@Service
+public class UserService {
 
 	@Resource
 	private UserMI userMI;
@@ -25,15 +25,20 @@ public class UserDao {
 		return userMI.loginUser(username, password);
 	}
 
+	public boolean UserDuplicate(String username) {
+		User user = userMI.UserDuplicate(username);
+		return user != null;
+	}
+
 
 	/**
 	 * 修改密码
 	 */
-	public boolean NewPassword(User user, String oldpass, String newpass) {
-		if (oldpass == null || newpass == null) {
+	public boolean NewPassword(User user, String oldPass, String newPass) {
+		if (oldPass == null || newPass == null) {
 			System.out.println("数据为空");
 			return false;
 		}
-		return user.NewPassword(oldpass, newpass, userMI);
+		return user.NewPassword(oldPass, newPass, userMI);
 	}
 }

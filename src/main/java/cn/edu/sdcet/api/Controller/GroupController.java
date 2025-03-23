@@ -1,8 +1,8 @@
-package cn.edu.sdcet.api.controller;
+package cn.edu.sdcet.api.Controller;
 
-import cn.edu.sdcet.api.dao.GroupDao;
-import cn.edu.sdcet.api.entity.*;
-import cn.edu.sdcet.api.entity.Package;
+import cn.edu.sdcet.api.Service.GroupService;
+import cn.edu.sdcet.api.Entity.*;
+import cn.edu.sdcet.api.Entity.Package;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import jakarta.annotation.Resource;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class GroupController {
 
 	@Resource
-	GroupDao groupDao;
+	GroupService groupService;
 
 	/**
 	 * 创建分组
@@ -28,7 +28,11 @@ public class GroupController {
 		Package bean = Tool.getPackage();
 		User user = Tool.getUser(session);
 		log.info("收到创建分组 {} 请求", name.getName());
-		if (groupDao.addGroup(user,name.getName())) {
+		if (name.Null()) {
+			bean.setMsg("输入错误");
+			return bean.toJSON();
+		}
+		if (groupService.addGroup(user,name.getName())) {
 			bean.setCode(0);
 			bean.setMsg("创建成功");
 			log.info("创建分组 {} 成功", name.getName());
@@ -44,10 +48,11 @@ public class GroupController {
 	 */
 	@DeleteMapping("/{id}")
 	@ResponseBody
-	public JSONObject deleteGroup(@PathVariable int id) {
+	public JSONObject deleteGroup(@PathVariable int id, HttpSession session) {
+		User user = Tool.getUser(session);
 		Package bean = Tool.getPackage();
 		log.info("收到删除分组 {} 请求", id);
-		if (groupDao.deleteGroup(id)) {
+		if (groupService.deleteGroup(id, user)) {
 			bean.setCode(0);
 			bean.setMsg("删除成功");
 			log.info("删除分组 {} 成功", id);
@@ -63,10 +68,15 @@ public class GroupController {
 	 */
 	@PatchMapping(value = "/{id}",produces = "application/json")
 	@ResponseBody
-	public JSONObject modifyName(@PathVariable int id, @RequestBody Group group) {
+	public JSONObject modifyName(@PathVariable int id, @RequestBody Group group, HttpSession session) {
 		Package bean = Tool.getPackage();
+		User user = Tool.getUser(session);
 		log.info("收到修改分组 {} 名称请求新名称 {}", id, group.getName());
-		JSONObject object = groupDao.modifyName(id, group.getName());
+		if (group.Null()) {
+			bean.setMsg("输入错误");
+			return bean.toJSON();
+		}
+		JSONObject object = groupService.modifyName(id, group.getName(), user);
 		if (object != null) {
 			bean.setCode(0);
 			bean.setMsg("修改成功");
@@ -88,7 +98,7 @@ public class GroupController {
 		Package bean = Tool.getPackage();
 		User user = Tool.getUser(session);
 		log.info("收到查询用户全部分组请求 用户:{}", user.getUsername());
-		JSONArray objects = groupDao.AllGroup(user);
+		JSONArray objects = groupService.AllGroup(user);
 		if (objects != null) {
 			bean.setCode(0);
 			bean.newData(objects);

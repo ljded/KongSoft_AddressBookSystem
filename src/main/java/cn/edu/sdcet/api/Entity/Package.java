@@ -1,4 +1,4 @@
-package cn.edu.sdcet.api.entity;
+package cn.edu.sdcet.api.Entity;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;

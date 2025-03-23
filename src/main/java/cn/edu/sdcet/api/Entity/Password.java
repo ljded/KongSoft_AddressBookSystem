@@ -1,4 +1,4 @@
-package cn.edu.sdcet.api.entity;
+package cn.edu.sdcet.api.Entity;
 
 import lombok.Data;
 import org.springframework.stereotype.Component;
@@ -8,4 +8,8 @@ import org.springframework.stereotype.Component;
 public class Password {
 	private String oldPassword;
 	private String newPassword;
+
+	public boolean Null() {
+		return oldPassword.isEmpty() || newPassword.isEmpty();
+	}
 }

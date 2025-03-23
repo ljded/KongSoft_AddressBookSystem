@@ -1,4 +1,4 @@
-package cn.edu.sdcet.api.entity;
+package cn.edu.sdcet.api.Entity;
 
 import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -62,5 +62,11 @@ public class Contact {
 		object.put("user_id", userId);
 		object.put("group_id", groupId);
 		return object;
+	}
+
+	public boolean Null(){
+		return  name.isEmpty()||
+				phone.isEmpty()||
+				email.isEmpty();
 	}
 }

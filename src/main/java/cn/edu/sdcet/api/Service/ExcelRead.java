@@ -1,7 +1,7 @@
-package cn.edu.sdcet.api.dao;
+package cn.edu.sdcet.api.Service;
 
-import cn.edu.sdcet.api.entity.Contact;
-import cn.edu.sdcet.api.entity.User;
+import cn.edu.sdcet.api.Entity.Contact;
+import cn.edu.sdcet.api.Entity.User;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.read.listener.ReadListener;
 import com.alibaba.excel.util.ListUtils;
@@ -22,16 +22,16 @@ public class ExcelRead implements ReadListener<Contact> {
 	 * 缓存
 	 */
 	private List<Contact> contactList = ListUtils.newArrayListWithExpectedSize(BATCH_COUNT);
-	private final ContactDao contactDao;
-	private final GroupDao groupDao;
+	private final ContactService contactService;
+	private final GroupService groupService;
 	private final User user;
 	Map<String, Integer> groupNames;
 
-	public ExcelRead(ContactDao contactDao, GroupDao groupDao, User user) {
-		this.contactDao = contactDao;
+	public ExcelRead(ContactService contactService, GroupService groupService, User user) {
+		this.contactService = contactService;
 		this.user = user;
-		groupNames = contactDao.getGroupName(user);
-		this.groupDao = groupDao;
+		groupNames = contactService.getGroupName(user);
+		this.groupService = groupService;
 	}
 
 	/**
@@ -45,8 +45,8 @@ public class ExcelRead implements ReadListener<Contact> {
 		if (groupName != null) {
 			Integer i = groupNames.get(groupName);
 			if (i == null) {
-				if (groupDao.addGroup(user, groupName)) {
-					groupNames = contactDao.getGroupName(user);
+				if (groupService.addGroup(user, groupName)) {
+					groupNames = contactService.getGroupName(user);
 					i = groupNames.get(groupName);
 				} else {
 					log.info("{} 分组创建失败", groupName);
@@ -60,7 +60,9 @@ public class ExcelRead implements ReadListener<Contact> {
 		contact.setPhone(olcontact.getPhone());
 		contact.setEmail(olcontact.getEmail());
 		contact.setComment(olcontact.getComment());
-		contactList.add(contact);
+		if (!olcontact.Null()) {
+			contactList.add(contact);
+		}
 		if (contactList.size() >= BATCH_COUNT) {
 			save();
 			contactList = ListUtils.newArrayListWithExpectedSize(BATCH_COUNT);
@@ -80,7 +82,7 @@ public class ExcelRead implements ReadListener<Contact> {
 
 	public void save() {
 		log.info("{}条数据，开始存储数据库！", contactList.size());
-		if (contactDao.addContactAffairs(contactList, user) != 0) {
+		if (contactService.addContactAffairs(contactList, user) != 0) {
 			log.info("保存成功");
 		} else {
 			log.info("保存失败");

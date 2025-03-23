@@ -1,4 +1,4 @@
-package cn.edu.sdcet.api.entity;
+package cn.edu.sdcet.api.Entity;
 
 import cn.edu.sdcet.api.Mapper.UserMI;
 import com.alibaba.fastjson2.JSONObject;
@@ -15,20 +15,24 @@ public class User {
 	private String password;
 
 	//新密码
-	public boolean NewPassword(String oldpass, String newpass, UserMI userMI) {
-		if (Passwordcompare(oldpass) || Passwordcompare(newpass)) {
-			return userMI.updateUserpass(userid, newpass) != 0;
+	public boolean NewPassword(String oldPass, String newPass, UserMI userMI) {
+		if (PassWordCompare(oldPass) && !PassWordCompare(newPass)) {
+			return userMI.updateUserPass(userid, newPass) != 0;
 		}
 		return false;
 	}
 
-	private boolean Passwordcompare(String pass) {
-		return !password.equals(pass);
+	private boolean PassWordCompare(String pass) {
+		return password.equals(pass);
 	}
 
 	public JSONObject getUserNameObj() {
 		JSONObject json = new JSONObject();
 		json.put("username", username);
 		return json;
+	}
+
+	public boolean Null() {
+		return username.isEmpty() || password.isEmpty();
 	}
 }

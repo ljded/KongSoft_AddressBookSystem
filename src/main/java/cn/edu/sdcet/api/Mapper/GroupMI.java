@@ -1,6 +1,6 @@
 package cn.edu.sdcet.api.Mapper;
 
-import cn.edu.sdcet.api.entity.Group;
+import cn.edu.sdcet.api.Entity.Group;
 import org.apache.ibatis.annotations.*;
 
 import java.util.Date;
@@ -13,19 +13,15 @@ public interface GroupMI {
 	int addGroup(@Param("Name") String Name, @Param("UserID") int UserID, @Param("Date") Date date);
 
 	//删除
-	@Delete("delete from `group` where `group_id`=#{gid}")
-	int deleteGroup(@Param("gid") int gid);
+	@Delete("delete from `group` where `group_id`=#{gid} AND `User_id`=#{userId}	")
+	int deleteGroup(@Param("gid") int gid, @Param("userId") int uid);
 
 	//修改分组名称
-	@Update("update `group` set `Name`=#{newName} where `group_id`=#{gid}")
-	int updateGroup(@Param("newName") String newName, @Param("gid") int gid);
-
-	//查询全部分组
-	@Select("select * from `group` where `User_id`=#{userId}")
-	List<Group> selectAllGroup(int userId);
+	@Update("update `group` set `Name`=#{newName} where `group_id`=#{gid} AND `User_id`=#{userId}")
+	int updateGroup(@Param("newName") String newName, @Param("gid") int gid, @Param("userId") int uid);
 
 	//查询分组
-	@Select("select * from `group` where `group_id`=#{gid}")
-	Group selectGroup(int gid);
+	@SelectProvider(value = GroupProvider.class, method = "selectGroup")
+	List<Group> selectGroup(@Param("userId") int userId,@Param("gid") int gid);
 
 }

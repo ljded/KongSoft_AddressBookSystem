@@ -1,4 +1,4 @@
-package cn.edu.sdcet.api.entity;
+package cn.edu.sdcet.api.Entity;
 
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Component;
@@ -13,4 +13,5 @@ public class Tool {
 	public static User getUser(HttpSession session) {
 		return (User) session.getAttribute("user");
 	}
+
 }

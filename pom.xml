@@ -10,9 +10,9 @@
     </parent>
     <groupId>cn.edu.sdcet</groupId>
     <artifactId>api</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>book management system</name>
-    <description>book management system</description>
+    <version>1.5</version>
+    <name>通讯录系统</name>
+    <description>通讯录系统</description>
     <url/>
     <licenses>
         <license/>

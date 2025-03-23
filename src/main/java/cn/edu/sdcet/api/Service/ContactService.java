@@ -1,33 +1,35 @@
-package cn.edu.sdcet.api.dao;
+package cn.edu.sdcet.api.Service;
 
+import cn.edu.sdcet.api.Entity.Package;
 import cn.edu.sdcet.api.Mapper.ContactMI;
-import cn.edu.sdcet.api.entity.Contact;
-import cn.edu.sdcet.api.entity.User;
+import cn.edu.sdcet.api.Entity.Contact;
+import cn.edu.sdcet.api.Entity.User;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
 @Slf4j
-@Component
-public class ContactDao {
+@Service
+public class ContactService {
 
 	@Resource
 	private ContactMI ContactMI;
 
 	@Resource
-	private GroupDao GroupDao;
+	private GroupService GroupService;
 
 	/**
 	 * 创建联系人
 	 */
 	public JSONObject addContact(String Name, String Phone, String Email, String Comment, Integer gid, User user) {
 		if(ContactMI.addContact(Name, Phone, Email, Comment, gid, new Date(), user.getUserid())!=0){
-			Contact contact = ContactMI.selectContact(user.getUserid(), Name, Phone);
+			List<Contact> contacts = ContactMI.selectContact(user.getUserid(), 0, Name, Phone);
+			Contact contact = contacts.getFirst();
 			if(contact!=null){
 				return contact.toJsonShort();
 			} else {
@@ -53,9 +55,10 @@ public class ContactDao {
 	/**
 	 * 删除联系人
 	 */
-	public JSONObject deleteContact(int ID) {
-		Contact contact = ContactMI.selectContactAtID(ID);
-		if(ContactMI.deleteContact(ID)!=0){
+	public JSONObject deleteContact(User user, int ID) {
+		List<Contact> contacts = ContactMI.selectContact(user.getUserid(), ID,null,null);
+		Contact contact = contacts.getFirst();
+		if(ContactMI.deleteContact(user.getUserid(), ID)!=0){
 			contact.setDeletedAt(new Date());
 			return contact.toJsonLong();
 		} else {
@@ -66,8 +69,9 @@ public class ContactDao {
 	/**
 	 * 查询指定联系人
 	 */
-	public JSONObject selectContactAtID(int ID) {
-		Contact contact = ContactMI.selectContactAtID(ID);
+	public JSONObject selectContactAtID(User user, int ID) {
+		List<Contact> contacts = ContactMI.selectContact(user.getUserid(), ID,null,null);
+		Contact contact = contacts.getFirst();
 		if(contact != null){
 			return contact.toJsonLong();
 		} else {
@@ -78,13 +82,27 @@ public class ContactDao {
 	/**
 	 * 更新联系人
 	 */
-	public JSONObject updateContact(String Name, String Phone, String Email, String Comment, Integer gid,int ID) {
-		if(ContactMI.UpdateContact(ID, Name, Phone, Email, Comment, new Date(), gid)!=0){
-			Contact contact = ContactMI.selectContactAtID(ID);
-			return contact.toJsonShort();
+	public Package updateContact(String Name, String Phone, String Email, String Comment, Integer gid,int ID, User user, Package bean) {
+		List<Contact> contacts = ContactMI.selectContact(user.getUserid(), ID, null, null);
+		if (contacts.size() == 1) {
+			if(ContactMI.UpdateContact(ID, Name, Phone, Email, Comment, new Date(), gid, user.getUserid())!=0){
+				contacts = ContactMI.selectContact(user.getUserid(),ID,null,null);
+				Contact contact = contacts.getFirst();
+				bean.setCode(0);
+				bean.setMsg("修改成功");
+				bean.newData(contact.toJsonShort());
+				log.info("修改联系人 {} 成功 new:{}", ID, contact.toJsonShort());
+			} else {
+				bean.setCode(500);
+				bean.setMsg("修改失败");
+				log.info("修改联系人 {} 失败 : 修改失败", ID);
+			}
 		} else {
-			return null;
+			bean.setCode(404);
+			bean.setMsg("未找到此联系人");
+			log.info("修改联系人 {} 失败 : 未找到联系人", ID);
 		}
+		return bean;
 	}
 
 	/**
@@ -92,7 +110,7 @@ public class ContactDao {
 	 */
 	public JSONArray getContacts(User user) {
 		JSONArray objects = new JSONArray();
-		List<Contact> contacts = ContactMI.getContactsAtID(user.getUserid());
+		List<Contact> contacts = ContactMI.selectContact(user.getUserid(),0,null,null);
 		for (Contact contact : contacts) {
 			objects.add(contact.toJsonLong());
 		}
@@ -106,7 +124,7 @@ public class ContactDao {
 		List<Contact> contacts = new ArrayList<>();
 		Map<Integer,String> GroupName = new HashMap<>();
 		//获取分组名称 Map
-		JSONArray GroupS = GroupDao.AllGroup(user);
+		JSONArray GroupS = GroupService.AllGroup(user);
 		log.info(GroupS.toString());
 		for (Object Group : GroupS) {
 			JSONObject JSONGroup = (JSONObject) Group;
@@ -134,7 +152,7 @@ public class ContactDao {
 	public Map<String,Integer> getGroupName(User user) {
 		Map<String,Integer> GroupName = new HashMap<>();
 		//获取分组名称 Map
-		JSONArray GroupS = GroupDao.AllGroup(user);
+		JSONArray GroupS = GroupService.AllGroup(user);
 		log.info(GroupS.toString());
 		for (Object Group : GroupS) {
 			JSONObject JSONGroup = (JSONObject) Group;

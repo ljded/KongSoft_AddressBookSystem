@@ -1,12 +1,12 @@
-package cn.edu.sdcet.api.controller;
+package cn.edu.sdcet.api.Controller;
 
-import cn.edu.sdcet.api.dao.ContactDao;
-import cn.edu.sdcet.api.dao.ExcelRead;
-import cn.edu.sdcet.api.dao.GroupDao;
-import cn.edu.sdcet.api.entity.Contact;
-import cn.edu.sdcet.api.entity.Package;
-import cn.edu.sdcet.api.entity.Tool;
-import cn.edu.sdcet.api.entity.User;
+import cn.edu.sdcet.api.Service.ContactService;
+import cn.edu.sdcet.api.Service.ExcelRead;
+import cn.edu.sdcet.api.Service.GroupService;
+import cn.edu.sdcet.api.Entity.Contact;
+import cn.edu.sdcet.api.Entity.Package;
+import cn.edu.sdcet.api.Entity.Tool;
+import cn.edu.sdcet.api.Entity.User;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.read.builder.ExcelReaderBuilder;
 import com.alibaba.fastjson2.JSONArray;
@@ -29,9 +29,9 @@ import java.util.List;
 public class ContactController {
 
 	@Resource
-	ContactDao contactDao;
+	ContactService contactService;
 	@Resource
-	GroupDao groupDao;
+	GroupService groupService;
 
 	/**
 	 * 创建联系人
@@ -42,7 +42,13 @@ public class ContactController {
 		Package bean = Tool.getPackage();
 		User user = Tool.getUser(session);
 		log.info("创建联系人收到请求:contact:{} user:{}", nContact.toString(), user.toString());
-		JSONObject object = contactDao.addContact(nContact.getName(),
+		if (nContact.Null()) {
+			bean.setCode(500);
+			bean.setMsg("联系人信息填写错误");
+			log.info("信息填写错误 500 已返回");
+			return bean.toJSON();
+		}
+		JSONObject object = contactService.addContact(nContact.getName(),
 				nContact.getPhone(), nContact.getEmail(),
 				nContact.getComment(), nContact.getGroup_id(), user);
 		if(object!=null){
@@ -62,9 +68,10 @@ public class ContactController {
 	 */
 	@DeleteMapping(value = "/{id}", produces = "application/json")
 	@ResponseBody
-	public JSONObject deleteContact(@PathVariable int id) {
+	public JSONObject deleteContact(@PathVariable int id, HttpSession session) {
+		User user = Tool.getUser(session);
 		Package bean = Tool.getPackage();
-		JSONObject object = contactDao.deleteContact(id);
+		JSONObject object = contactService.deleteContact(user,id);
 		log.info("删除联系人收到请求:id:{}", id);
 		if(object!=null){
 			bean.setCode(0);
@@ -83,21 +90,20 @@ public class ContactController {
 	 */
 	@PutMapping(value = "/{id}", produces = "application/json")
 	@ResponseBody
-	public JSONObject modifyContact(@PathVariable int id, @RequestBody Contact nContact) {
+	public JSONObject modifyContact(@PathVariable int id, @RequestBody Contact nContact, HttpSession session) {
 		Package bean = Tool.getPackage();
+		User user = Tool.getUser(session);
 		log.info("修改联系人收到请求:id:{} contact:{}", id, nContact.toString());
-		JSONObject object = contactDao.updateContact(nContact.getName(),
-				nContact.getPhone(), nContact.getEmail(),
-				nContact.getComment(), nContact.getGroup_id(), id);
-		if(object!=null){
-			bean.setCode(0);
-			bean.setMsg("修改成功");
-			bean.newData(object);
-			log.info("修改联系人 {} 成功 new:{}", id, object);
-		} else {
-			bean.setMsg("修改失败");
-			log.info("修改联系人 {} 失败", id);
+		if (!nContact.Null()) {
+			if (nContact.getGroup_id() == 0){
+				nContact.setGroup_id(null);
+			}
+			return contactService.updateContact(nContact.getName(),
+					nContact.getPhone(), nContact.getEmail(),
+					nContact.getComment(), nContact.getGroup_id(), id,user, bean).toJSON();
 		}
+		bean.setCode(500);
+		bean.setMsg("输入错误");
 		return bean.toJSON();
 	}
 
@@ -110,7 +116,7 @@ public class ContactController {
 		Package bean = Tool.getPackage();
 		User user = Tool.getUser(session);
 		log.info("收到查询 {} 全部联系人请求", user.getUsername());
-		JSONArray contacts = contactDao.getContacts(user);
+		JSONArray contacts = contactService.getContacts(user);
 		if (contacts != null) {
 			bean.setCode(0);
 			bean.newData(contacts);
@@ -124,10 +130,11 @@ public class ContactController {
 	 */
 	@GetMapping(value = "/{id}", produces = "application/json")
 	@ResponseBody
-	public JSONObject getIDContact(@PathVariable int id) {
+	public JSONObject getIDContact(@PathVariable int id, HttpSession session) {
 		Package bean = Tool.getPackage();
+		User user = Tool.getUser(session);
 		log.info("收到查询 {} 联系人请求", id);
-		JSONObject contact = contactDao.selectContactAtID(id);
+		JSONObject contact = contactService.selectContactAtID(user, id);
 		if (contact != null) {
 			bean.setCode(0);
 			bean.newData(contact);
@@ -140,19 +147,20 @@ public class ContactController {
 	public void getExcel(HttpServletResponse response, HttpSession session) throws IOException {
 		User user = Tool.getUser(session);
 		response.setHeader("Content-Disposition", "attachment; filename=contacts.xlsx");
-		List<Contact> excel = contactDao.getExcel(user);
+		List<Contact> excel = contactService.getExcel(user);
 		if (excel != null) {
 			EasyExcel.write(response.getOutputStream(), Contact.class).sheet("联系人").doWrite(excel);
 		}
 	}
 
 	@PostMapping("/import")
+	@ResponseBody
 	public JSONObject setExcel(MultipartFile file , HttpSession session) throws IOException {
 		Package bean = Tool.getPackage();
 		User user = Tool.getUser(session);
 		JSONObject contact1 = getContact(session);
 		InputStream inputStream = file.getInputStream();
-		ExcelReaderBuilder read = EasyExcel.read(inputStream, Contact.class, new ExcelRead(contactDao, groupDao, user));
+		ExcelReaderBuilder read = EasyExcel.read(inputStream, Contact.class, new ExcelRead(contactService, groupService, user));
 		read.sheet().doRead();
 		JSONObject contact2 = getContact(session);
 		if (contact1.equals(contact2)) {

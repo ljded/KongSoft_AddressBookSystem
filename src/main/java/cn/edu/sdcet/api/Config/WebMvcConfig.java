@@ -1,4 +1,4 @@
-package cn.edu.sdcet.api.config;
+package cn.edu.sdcet.api.Config;
 
 
 import com.alibaba.fastjson2.JSONReader;
@@ -28,7 +28,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 		converter.setFastJsonConfig(config);
 		converter.setDefaultCharset(StandardCharsets.UTF_8);
 		converter.setSupportedMediaTypes(Collections.singletonList(MediaType.APPLICATION_JSON));
-		converters.add(0, converter);
+		converters.addFirst(converter);
 	}
 
 }

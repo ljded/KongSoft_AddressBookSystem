@@ -1,4 +1,4 @@
-package cn.edu.sdcet.api.entity;
+package cn.edu.sdcet.api.Entity;
 
 import com.alibaba.fastjson2.JSONObject;
 import lombok.Data;
@@ -15,6 +15,10 @@ public class Group {
 	private Date DeletedAt;
 	private String Name;
 	private int UserID;
+
+	public boolean Null() {
+		return Name.isEmpty();
+	}
 
 	public JSONObject toJson(){
 		JSONObject object = new JSONObject();
