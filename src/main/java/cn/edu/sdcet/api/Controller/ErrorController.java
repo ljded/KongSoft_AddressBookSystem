@@ -3,10 +3,12 @@ package cn.edu.sdcet.api.Controller;
 import cn.edu.sdcet.api.Entity.Package;
 import cn.edu.sdcet.api.Entity.Tool;
 import com.alibaba.fastjson2.JSONObject;
+import jakarta.websocket.SessionException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
 
 @ControllerAdvice
 public class ErrorController {
@@ -26,5 +28,10 @@ public class ErrorController {
 		}
 		bean.setMsg(str);
 		return bean.toJSON();
+	}
+
+	@ExceptionHandler(SessionException.class)
+	public ModelAndView SessionError() {
+		return new ModelAndView("index");
 	}
 }

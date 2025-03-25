@@ -131,6 +131,7 @@ public class ContactController {
 		List<Contact> excel = contactService.getExcel(user);
 		if (excel != null) {
 			EasyExcel.write(response.getOutputStream(), Contact.class).sheet("联系人").doWrite(excel);
+			//EasyExcel 的输出很慢
 		}
 	}
 

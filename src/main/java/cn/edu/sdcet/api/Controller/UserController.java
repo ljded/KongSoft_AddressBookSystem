@@ -94,6 +94,9 @@ public class UserController {
 		if (userService.NewPassword(user, password.getOldPassword(), password.getNewPassword())) {
 			bean.setCode(0);
 			bean.setMsg("密码修改成功");
+			User login = userService.login(user.getUsername(), password.getNewPassword());
+			session.removeAttribute("user");
+			session.setAttribute("user", login);
 		} else {
 			bean.setMsg("密码修改失败");
 		}
