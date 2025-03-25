@@ -39,7 +39,7 @@ public class ExcelRead implements ReadListener<Contact> {
 	 */
 	@Override
 	public void invoke(Contact olcontact, AnalysisContext analysisContext) {
-		log.info("解析到一条数据:{}", JSON.toJSONString(olcontact));
+		log.info("Read Excel :解析 :{}", JSON.toJSONString(olcontact));
 		Contact contact = new Contact();
 		String groupName = olcontact.getGroupName();
 		if (groupName != null) {
@@ -49,7 +49,7 @@ public class ExcelRead implements ReadListener<Contact> {
 					groupNames = contactService.getGroupName(user);
 					i = groupNames.get(groupName);
 				} else {
-					log.info("{} 分组创建失败", groupName);
+					log.info("Read Excel : 错误 : {} 分组创建失败", groupName);
 				}
 			}
 			contact.setGroup_id(i);
@@ -77,15 +77,15 @@ public class ExcelRead implements ReadListener<Contact> {
 		if (!contactList.isEmpty()) {
 			save();
 		}
-		log.info("解析完成");
+		log.info("Read Excel : 结束 :解析完成");
 	}
 
 	public void save() {
-		log.info("{}条数据，开始存储数据库！", contactList.size());
+		log.info("Read Excel : 保存 :{}条数据，开始存储数据库！", contactList.size());
 		if (contactService.addContactAffairs(contactList, user) != 0) {
-			log.info("保存成功");
+			log.info("Read Excel : 保存 :保存成功");
 		} else {
-			log.info("保存失败");
+			log.info("Read Excel : 错误 :保存失败");
 		}
 	}
 }

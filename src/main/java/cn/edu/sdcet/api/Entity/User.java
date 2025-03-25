@@ -2,6 +2,7 @@ package cn.edu.sdcet.api.Entity;
 
 import cn.edu.sdcet.api.Mapper.UserMI;
 import com.alibaba.fastjson2.JSONObject;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
@@ -11,7 +12,9 @@ import org.springframework.web.context.annotation.SessionScope;
 @Component
 public class User {
 	private int userid;
+	@Size(min = 1, message = "用户名不能为空")
 	private String username;
+	@Size(min = 1, message = "密码不能为空")
 	private String password;
 
 	//新密码

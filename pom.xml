@@ -10,7 +10,7 @@
     </parent>
     <groupId>cn.edu.sdcet</groupId>
     <artifactId>api</artifactId>
-    <version>1.5</version>
+    <version>2.0</version>
     <name>通讯录系统</name>
     <description>通讯录系统</description>
     <url/>
@@ -30,6 +30,10 @@
         <java.version>21</java.version>
     </properties>
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
@@ -81,6 +85,14 @@
             <groupId>com.alibaba</groupId>
             <artifactId>easyexcel</artifactId>
             <version>4.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
     </dependencies>
 

@@ -4,6 +4,8 @@ import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.write.style.ColumnWidth;
 import com.alibaba.fastjson2.JSONObject;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
@@ -14,14 +16,17 @@ import java.util.Objects;
 @Component
 public class Contact {
 	@ExcelProperty(value = "姓名")
+	@Size(min = 1, message = "姓名不能为空")
 	private String name;
 	@ExcelIgnore
 	private int ID;
 	@ColumnWidth(30)
 	@ExcelProperty(value = "手机号码")
+	@Size(min = 1, message = "手机号码不能为空")
 	private String phone;
 	@ColumnWidth(50)
 	@ExcelProperty(value = "电子邮箱")
+	@Email(message = "电子邮箱格式不正确")
 	private String email;
 	@ExcelProperty(value = "备注")
 	private String comment;

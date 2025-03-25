@@ -14,8 +14,9 @@ import com.alibaba.fastjson2.JSONObject;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import lombok.extern.slf4j.Slf4j;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,8 +24,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-@Slf4j
 @Controller
+@Validated
 @RequestMapping("/api/contact")
 public class ContactController {
 
@@ -38,16 +39,9 @@ public class ContactController {
 	 */
 	@PostMapping(value = "", produces = "application/json")
 	@ResponseBody
-	public JSONObject addContact(@RequestBody Contact nContact, HttpSession session) {
+	public JSONObject addContact(@RequestBody @Valid Contact nContact, HttpSession session) {
 		Package bean = Tool.getPackage();
 		User user = Tool.getUser(session);
-		log.info("创建联系人收到请求:contact:{} user:{}", nContact.toString(), user.toString());
-		if (nContact.Null()) {
-			bean.setCode(500);
-			bean.setMsg("联系人信息填写错误");
-			log.info("信息填写错误 500 已返回");
-			return bean.toJSON();
-		}
 		JSONObject object = contactService.addContact(nContact.getName(),
 				nContact.getPhone(), nContact.getEmail(),
 				nContact.getComment(), nContact.getGroup_id(), user);
@@ -55,10 +49,8 @@ public class ContactController {
 			bean.setCode(0);
 			bean.setMsg("创建成功");
 			bean.newData(object);
-			log.info("创建成功:contact:{}", object);
 		} else {
 			bean.setMsg("创建失败");
-			log.info("创建失败");
 		}
 		return bean.toJSON();
 	}
@@ -72,15 +64,12 @@ public class ContactController {
 		User user = Tool.getUser(session);
 		Package bean = Tool.getPackage();
 		JSONObject object = contactService.deleteContact(user,id);
-		log.info("删除联系人收到请求:id:{}", id);
 		if(object!=null){
 			bean.setCode(0);
 			bean.setMsg("删除成功");
 			bean.newData(object);
-			log.info("删除 {} 成功", id);
 		} else {
 			bean.setMsg("删除失败");
-			log.info("删除 {} 失败", id);
 		}
 		return bean.toJSON();
 	}
@@ -90,21 +79,17 @@ public class ContactController {
 	 */
 	@PutMapping(value = "/{id}", produces = "application/json")
 	@ResponseBody
-	public JSONObject modifyContact(@PathVariable int id, @RequestBody Contact nContact, HttpSession session) {
+	public JSONObject modifyContact(@PathVariable int id, @RequestBody  @Valid Contact nContact, HttpSession session) {
 		Package bean = Tool.getPackage();
 		User user = Tool.getUser(session);
-		log.info("修改联系人收到请求:id:{} contact:{}", id, nContact.toString());
-		if (!nContact.Null()) {
+		if (nContact.getGroup_id() != null) {
 			if (nContact.getGroup_id() == 0){
 				nContact.setGroup_id(null);
 			}
-			return contactService.updateContact(nContact.getName(),
-					nContact.getPhone(), nContact.getEmail(),
-					nContact.getComment(), nContact.getGroup_id(), id,user, bean).toJSON();
 		}
-		bean.setCode(500);
-		bean.setMsg("输入错误");
-		return bean.toJSON();
+		return contactService.updateContact(nContact.getName(),
+			nContact.getPhone(), nContact.getEmail(),
+			nContact.getComment(), nContact.getGroup_id(), id,user, bean).toJSON();
 	}
 
 	/**
@@ -115,12 +100,10 @@ public class ContactController {
 	public JSONObject getContact(HttpSession session) {
 		Package bean = Tool.getPackage();
 		User user = Tool.getUser(session);
-		log.info("收到查询 {} 全部联系人请求", user.getUsername());
 		JSONArray contacts = contactService.getContacts(user);
 		if (contacts != null) {
 			bean.setCode(0);
 			bean.newData(contacts);
-			log.info("查询 {} 全部联系人成功", user.getUsername());
 		}
 		return bean.toJSON();
 	}
@@ -133,12 +116,10 @@ public class ContactController {
 	public JSONObject getIDContact(@PathVariable int id, HttpSession session) {
 		Package bean = Tool.getPackage();
 		User user = Tool.getUser(session);
-		log.info("收到查询 {} 联系人请求", id);
 		JSONObject contact = contactService.selectContactAtID(user, id);
 		if (contact != null) {
 			bean.setCode(0);
 			bean.newData(contact);
-			log.info("查询 {} 联系人成功", id);
 		}
 		return bean.toJSON();
 	}

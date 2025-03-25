@@ -7,13 +7,11 @@ import cn.edu.sdcet.api.Entity.User;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import jakarta.annotation.Resource;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
-@Slf4j
 @Service
 public class ContactService {
 
@@ -91,16 +89,13 @@ public class ContactService {
 				bean.setCode(0);
 				bean.setMsg("修改成功");
 				bean.newData(contact.toJsonShort());
-				log.info("修改联系人 {} 成功 new:{}", ID, contact.toJsonShort());
 			} else {
-				bean.setCode(500);
+				bean.setCode(400);
 				bean.setMsg("修改失败");
-				log.info("修改联系人 {} 失败 : 修改失败", ID);
 			}
 		} else {
 			bean.setCode(404);
 			bean.setMsg("未找到此联系人");
-			log.info("修改联系人 {} 失败 : 未找到联系人", ID);
 		}
 		return bean;
 	}
@@ -125,7 +120,6 @@ public class ContactService {
 		Map<Integer,String> GroupName = new HashMap<>();
 		//获取分组名称 Map
 		JSONArray GroupS = GroupService.AllGroup(user);
-		log.info(GroupS.toString());
 		for (Object Group : GroupS) {
 			JSONObject JSONGroup = (JSONObject) Group;
 			Integer id = JSONGroup.getInteger("ID");
@@ -134,7 +128,6 @@ public class ContactService {
 		}
 		//获取联系人列表
 		JSONArray ContactS = this.getContacts(user);
-		log.info(ContactS.toString());
 		for (Object Contact : ContactS) {
 			JSONObject JSONContact = (JSONObject) Contact;
 			Contact contact = new Contact();
@@ -153,7 +146,6 @@ public class ContactService {
 		Map<String,Integer> GroupName = new HashMap<>();
 		//获取分组名称 Map
 		JSONArray GroupS = GroupService.AllGroup(user);
-		log.info(GroupS.toString());
 		for (Object Group : GroupS) {
 			JSONObject JSONGroup = (JSONObject) Group;
 			Integer id = JSONGroup.getInteger("ID");

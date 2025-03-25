@@ -2,9 +2,11 @@ package cn.edu.sdcet.api.Entity;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 
+@Getter
 @Setter
 @Component
 public class Package {
@@ -12,13 +14,6 @@ public class Package {
 	String msg = null;
 	JSONArray ArrayData = null;
 	JSONObject ObjectData = null;
-
-	public void addData(JSONObject data) {
-		if (ArrayData == null) {
-			ArrayData = new JSONArray();
-		}
-		this.ArrayData.add(data);
-	}
 
 	public void newData(JSONObject data) {
 		this.ObjectData = data;
@@ -43,7 +38,6 @@ public class Package {
 			}
 			json.put("data", ObjectData);
 		}
-
 		return json;
 	}
 
