@@ -10,22 +10,9 @@
     </parent>
     <groupId>cn.edu.sdcet</groupId>
     <artifactId>api</artifactId>
-    <version>2.0</version>
+    <version>2.6</version>
     <name>通讯录系统</name>
     <description>通讯录系统</description>
-    <url/>
-    <licenses>
-        <license/>
-    </licenses>
-    <developers>
-        <developer/>
-    </developers>
-    <scm>
-        <connection/>
-        <developerConnection/>
-        <tag/>
-        <url/>
-    </scm>
     <properties>
         <java.version>21</java.version>
     </properties>
